@@ -31,7 +31,7 @@ protocol NaverMapOptionSink {
 }
 
 
-class NaverMapController: NSObject, FlutterPlatformView, NaverMapOptionSink, NMFMapViewTouchDelegate, NMFMapViewCameraDelegate, NMFAuthManagerDelegate {
+class NaverMapController: NSObject, FlutterPlatformView, NaverMapOptionSink, NMFMapViewTouchDelegate, NMFMapViewCameraDelegate, NMFAuthManagerDelegate, UIGestureRecognizerDelegate {
     
     var mapView : NMFMapView?
     var naverMap : NMFNaverMapView?
@@ -74,6 +74,10 @@ class NaverMapController: NSObject, FlutterPlatformView, NaverMapOptionSink, NMF
         NMFAuthManager.shared().delegate = self as NMFAuthManagerDelegate // for debug
 
         mapView!.touchDelegate = self
+        
+        let longTabGesture : UILongPressGestureRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(self.logTabView(_:)))
+        mapView!.addGestureRecognizer(longTabGesture)
+        
         mapView!.addCameraDelegate(delegate: self)
         if let arg = argument {
             if let initialPositionData = arg["initialCameraPosition"] {
@@ -372,6 +376,17 @@ class NaverMapController: NSObject, FlutterPlatformView, NaverMapOptionSink, NMF
     }
     
     // Naver touch Delegate method
+    
+    @IBAction func logTabView(_ sender: UILongPressGestureRecognizer){
+        if sender.state == .began {
+            let coord = sender.location(in: mapView)
+            let latlng = mapView?.projection.latlng(from: coord)
+            print("\(latlng?.positionString())")
+            channel?.invokeMethod("map#onLongTap", arguments: ["position" : [latlng!.lat, latlng!.lng]])
+            print("long")
+        }
+    }
+    
     func mapView(_ mapView: NMFMapView, didTapMap latlng: NMGLatLng, point: CGPoint) {
         channel?.invokeMethod("map#onTap", arguments: ["position" : [latlng.lat, latlng.lng]])
     }
@@ -527,5 +542,10 @@ class NaverMapController: NSObject, FlutterPlatformView, NaverMapOptionSink, NMF
         if let e = error {
             print("네이버 지도 인증 에러 발생 : \(e.localizedDescription)")
         }
+    }
+}
+extension NMGLatLng {
+    func positionString() -> String {
+        return String(format: "(%.5f, %.5f)", lat, lng)
     }
 }
