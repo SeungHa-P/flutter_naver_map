@@ -93,7 +93,7 @@ public func toOverlayImageFromFile(imagePath: String) -> NMFOverlayImage? {
 public func toOverlayImageFromUrl(imageUrl: String) -> NMFOverlayImage? {
     var tempImg : UIImage
          if let ImageData = try? Data(contentsOf: URL(string: imageUrl)!) {
-             tempImg = UIImage(data: ImageData)!
+             tempImg = UIImage(data: ImageData)!.circle!
          return NMFOverlayImage(image: tempImg)
      }
     return nil
