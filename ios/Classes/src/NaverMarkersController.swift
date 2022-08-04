@@ -110,6 +110,10 @@ class NMarkerController: NSObject {
            let overlayImage = toOverlayImageFromFile(imagePath: imagePath) {
             marker.iconImage = overlayImage
         }
+        if let imageURL = json["iconFromUrl"] as? String,
+           let overlayImage = toOverlayImageFromUrl(imageUrl: imageURL){
+            marker.iconImage = overlayImage
+        }
         if let infoWindowText = json["infoWindow"] as? String {
             self.infoWindowTitle = infoWindowText
         }

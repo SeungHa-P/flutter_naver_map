@@ -90,6 +90,14 @@ public func toOverlayImageFromFile(imagePath: String) -> NMFOverlayImage? {
     }
     return nil
 }
+public func toOverlayImageFromUrl(imageUrl: String) -> NMFOverlayImage? {
+    var tempImg : UIImage
+         if let ImageData = try? Data(contentsOf: URL(string: imageUrl)!) {
+             tempImg = UIImage(data: ImageData)!
+         return NMFOverlayImage(image: tempImg)
+     }
+    return nil
+}
 
 // ============================= 객체를 json 으로 =================================
 
