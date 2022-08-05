@@ -94,11 +94,19 @@ public func toOverlayImageFromUrl(imageUrl: String) -> NMFOverlayImage? {
     var tempImg : UIImage
          if let ImageData = try? Data(contentsOf: URL(string: imageUrl)!) {
              tempImg = UIImage(data: ImageData)!.circle!
-         return NMFOverlayImage(image: tempImg)
+             let customView : UIView = {
+                 let view = UIView(frame: .init(x: 0, y: 0, width: 50, height: 59))
+                 view.backgroundColor = UIColor(patternImage: UIImage(named: "markerBack")!)
+                 view.contentMode = .scaleAspectFill
+                 let imageView = UIImageView(frame: .init(x: 5, y: 5, width: 40, height: 40))
+                 imageView.image = tempImg
+                 view.addSubview(imageView)
+                 return view
+             }()
+             return NMFOverlayImage(image: customView.asImage()!)
      }
     return nil
 }
-
 // ============================= 객체를 json 으로 =================================
 
 
@@ -137,5 +145,21 @@ var circle: UIImage? {
         let result = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
         return result
+    }
+}
+extension UIView {
+
+    // Using a function since `var image` might conflict with an existing variable
+    // (like on `UIImageView`)
+    func asImage() -> UIImage? {
+        if #available(iOS 10.0, *) {
+            let renderer = UIGraphicsImageRenderer(bounds: bounds)
+            return renderer.image { rendererContext in
+                layer.render(in: rendererContext.cgContext)
+            }
+        } else {
+            return nil
+        }
+            
     }
 }
