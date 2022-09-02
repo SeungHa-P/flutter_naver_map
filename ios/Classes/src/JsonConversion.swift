@@ -98,7 +98,7 @@ public func toOverlayImageFromUrl(imageUrl: String) -> NMFOverlayImage? {
                  let view = UIView(frame: .init(x: 0, y: 0, width: 49, height: 59))
                  view.backgroundColor = UIColor(patternImage: UIImage(named: "markerBack")!)
                  view.contentMode = .scaleAspectFill
-                 let imageView = UIImageView(frame: .init(x: 5, y: 5, width: 40, height: 40))
+                 let imageView = UIImageView(frame: .init(x: 4, y: 5, width: 40, height: 40))
                  imageView.image = tempImg
                  view.addSubview(imageView)
                  return view
