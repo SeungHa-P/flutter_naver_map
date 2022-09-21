@@ -6,9 +6,14 @@ public class SwiftNaverMapPlugin: NSObject, FlutterPlugin {
     
     public static func register(with registrar: FlutterPluginRegistrar) {
         let naverMapFactory = NaverMapFactory(registrar: registrar)
-        registrar.register(naverMapFactory,
-                           withId: "naver_map_plugin",
-                           gestureRecognizersBlockingPolicy: FlutterPlatformViewGestureRecognizersBlockingPolicyWaitUntilTouchesEnded)
+     
+        //        registrar.register(naverMapFactory,
+        //                           withId: "naver_map_plugin",
+        //                           gestureRecognizersBlockingPolicy: FlutterPlatformViewGestureRecognizersBlockingPolicyWaitUntilTouchesEnded)
+                // 09 21
+                registrar.register(naverMapFactory,
+                                   withId: "naver_map_plugin",
+                                   gestureRecognizersBlockingPolicy: FlutterPlatformViewGestureRecognizersBlockingPolicyEager)
     }
     
 }
