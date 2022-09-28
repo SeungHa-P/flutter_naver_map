@@ -58,7 +58,7 @@ class OverlayImage {
   static OverlayImage fromImageFile(File imageFile) {
     return OverlayImage._(imageFile: imageFile);
   }
-  static OverlayImage fromImageUrl(String imageUrl){
+  static Future<OverlayImage> fromImageUrl(String imageUrl) async {
     return OverlayImage._(imageUrl: imageUrl);
   }
 }
