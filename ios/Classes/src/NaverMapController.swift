@@ -110,7 +110,17 @@ class NaverMapController: NSObject, FlutterPlatformView, NaverMapOptionSink, NMF
     func view() -> UIView {
         return naverMap!
     }
-    
+    // 재호수정
+    func resizeImage(image: UIImage, newWidth: CGFloat) -> UIImage {
+        let scale = newWidth / image.size.width // 새 이미지 확대/축소 비율
+        let newHeight = image.size.height * scale
+        UIGraphicsBeginImageContext(CGSizeMake(newWidth, newHeight))
+        image.draw(in: CGRectMake(0, 0, newWidth, newHeight))
+        let newImage = UIGraphicsGetImageFromCurrentImageContext()!
+        UIGraphicsEndImageContext()
+        return newImage
+    }
+    // 재호수정 e1
     func handle(call: FlutterMethodCall, result:@escaping FlutterResult) {
         switch call.method {
         case "map#clearMapView":
@@ -198,7 +208,11 @@ class NaverMapController: NSObject, FlutterPlatformView, NaverMapOptionSink, NMF
             if let tmpFileUrl = NSURL.fileURL(withPathComponents: [dir, fileName]) {
                 DispatchQueue.main.async {
                     self.naverMap!.takeSnapShot({ (image) in
-                        if let data = image.jpegData(compressionQuality: 1.0) ?? image.pngData() {
+                        // 재호수정 s2
+                        let resizedImage = self.resizeImage(image:image, newWidth: 300)
+                        
+                        if let data = resizedImage.jpegData(compressionQuality: 0.2) ?? image.pngData() {
+                            // 재호수정 e2
                             do{
                                 try data.write(to: tmpFileUrl)
                                 self.channel?.invokeMethod("snapshot#done", arguments: ["path" : tmpFileUrl.path])
