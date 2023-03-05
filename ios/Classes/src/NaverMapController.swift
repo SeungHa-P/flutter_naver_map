@@ -209,9 +209,9 @@ class NaverMapController: NSObject, FlutterPlatformView, NaverMapOptionSink, NMF
                 DispatchQueue.main.async {
                     self.naverMap!.takeSnapShot({ (image) in
                         // 재호수정 s2
-//                        let resizedImage = self.resizeImage(image:image, newWidth: 300)
+                        let resizedImage = self.resizeImage(image:image, newWidth: self.view().frame.width)
                         
-                        if let data = image.jpegData(compressionQuality: 0.2) ?? image.pngData() {
+                        if let data = resizedImage.jpegData(compressionQuality: 0.2) ?? image.pngData() {
                             // 재호수정 e2
                             do{
                                 try data.write(to: tmpFileUrl)
