@@ -1,6 +1,17 @@
 package map.naver.plugin.net.note11.naver_map_plugin
 
 import android.content.Context
+import android.content.res.Resources
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.Matrix
+import android.graphics.Paint
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffXfermode
+import android.graphics.Rect
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.os.Handler
 import map.naver.plugin.net.note11.naver_map_plugin.Convert.toLatLng
 import map.naver.plugin.net.note11.naver_map_plugin.Convert.toPoint
@@ -13,8 +24,18 @@ import android.os.Looper
 import com.naver.maps.map.overlay.InfoWindow
 import android.util.DisplayMetrics
 import android.view.WindowManager
+import androidx.core.graphics.get
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.MultiTransformation
+import com.bumptech.glide.load.resource.bitmap.CircleCrop
+import com.bumptech.glide.request.RequestOptions
+import com.bumptech.glide.request.target.CustomTarget
+import com.bumptech.glide.request.target.SimpleTarget
+import com.bumptech.glide.request.transition.Transition
 import com.naver.maps.map.overlay.InfoWindow.DefaultTextAdapter
 import com.naver.maps.map.overlay.Marker
+import com.naver.maps.map.overlay.OverlayImage
+import map.naver.plugin.net.lbstech.naver_map_plugin.R
 import java.util.HashMap
 import java.util.concurrent.Executors
 import kotlin.math.roundToInt
@@ -148,6 +169,34 @@ class NaverMarkerController(
             if (icon != null) marker.icon = toOverlayImage(icon)
             val iconImagePath = json["iconFromPath"]
             if (iconImagePath != null) marker.icon = toOverlayImageFromPath(iconImagePath)
+            val iconImageUrl = json["iconFromUrl"]
+            if (iconImageUrl != null) {
+                Glide.with(context).asBitmap().load(iconImageUrl)
+//                    .apply(RequestOptions.circleCropTransform())
+                    .circleCrop()
+                    .into(
+                        object : CustomTarget<Bitmap>(){
+                            override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
+                                val backBitmap = BitmapFactory.decodeResource(context.resources,R.drawable.markerback)
+                                val markerBackResizeImage = resizeBitmap(backBitmap,50,60)
+                                val markerContentsResizeImage = resizeBitmap(resource,40,40)
+                                val resultBitmap = Bitmap.createBitmap(markerBackResizeImage.width,markerBackResizeImage.height,markerBackResizeImage.config)
+                                val resultCanvas = Canvas(resultBitmap)
+                                resultCanvas.drawBitmap(markerBackResizeImage, Matrix(),null)
+                                resultCanvas.drawBitmap(markerContentsResizeImage,dpToPxInt(5).toFloat(),dpToPxInt(4).toFloat(),null)
+                                backBitmap.recycle()
+                                resource.recycle()
+                                marker.icon = OverlayImage.fromBitmap(resultBitmap)
+
+                            }
+                            override fun onLoadCleared(placeholder: Drawable?) {
+
+                            }
+                        }
+                    )
+
+            }
+
             val infoWindow = json["infoWindow"]
             infoWindowText = if (infoWindow != null) infoWindow as String? else null
         }
@@ -175,5 +224,14 @@ class NaverMarkerController(
                 infoWindow.open(marker)
             }
         }
+    }
+
+    fun resizeBitmap(resource : Bitmap,width : Int, height : Int) : Bitmap{
+        return Bitmap.createScaledBitmap(resource,dpToPxInt(width),dpToPxInt(height),true)
+    }
+
+    fun dpToPxInt(dp : Int) : Int{
+        val density = context.resources.displayMetrics.density
+        return (dp * density).toInt()
     }
 }
