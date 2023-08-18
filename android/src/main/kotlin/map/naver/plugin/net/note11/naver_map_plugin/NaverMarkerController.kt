@@ -36,6 +36,7 @@ import com.naver.maps.map.overlay.InfoWindow.DefaultTextAdapter
 import com.naver.maps.map.overlay.Marker
 import com.naver.maps.map.overlay.OverlayImage
 import map.naver.plugin.net.lbstech.naver_map_plugin.R
+import map.naver.plugin.net.note11.naver_map_plugin.Convert.toOverlayImageFromURL
 import java.util.HashMap
 import java.util.concurrent.Executors
 import kotlin.math.roundToInt
@@ -171,29 +172,36 @@ class NaverMarkerController(
             if (iconImagePath != null) marker.icon = toOverlayImageFromPath(iconImagePath)
             val iconImageUrl = json["iconFromUrl"]
             if (iconImageUrl != null) {
-                Glide.with(context).asBitmap().load(iconImageUrl)
-//                    .apply(RequestOptions.circleCropTransform())
-                    .circleCrop()
-                    .into(
-                        object : CustomTarget<Bitmap>(){
-                            override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
-                                val backBitmap = BitmapFactory.decodeResource(context.resources,R.drawable.markerback)
-                                val markerBackResizeImage = resizeBitmap(backBitmap,50,60)
-                                val markerContentsResizeImage = resizeBitmap(resource,40,40)
-                                val resultBitmap = Bitmap.createBitmap(markerBackResizeImage.width,markerBackResizeImage.height,markerBackResizeImage.config)
-                                val resultCanvas = Canvas(resultBitmap)
-                                resultCanvas.drawBitmap(markerBackResizeImage, Matrix(),null)
-                                resultCanvas.drawBitmap(markerContentsResizeImage,dpToPxInt(5).toFloat(),dpToPxInt(4).toFloat(),null)
-                                backBitmap.recycle()
-                                resource.recycle()
-                                marker.icon = OverlayImage.fromBitmap(resultBitmap)
-
-                            }
-                            override fun onLoadCleared(placeholder: Drawable?) {
-
-                            }
-                        }
-                    )
+                val markerImage = toOverlayImageFromURL(context,iconImageUrl.toString())
+                if(markerImage != null){
+                        marker.icon = markerImage
+                }
+//                Glide.with(context).asBitmap().load(iconImageUrl)
+////                    .apply(RequestOptions.circleCropTransform())
+//                    .circleCrop()
+//                    .into(
+//                        object : CustomTarget<Bitmap>(){
+//                            override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
+//                                val backBitmap = BitmapFactory.decodeResource(context.resources,R.drawable.markerback)
+////                                val markerBackResizeImage = resizeBitmap(backBitmap,50,60)
+////                                val markerContentsResizeImage = resizeBitmap(resource,40,40)
+////                                val resultBitmap = Bitmap.createBitmap(markerBackResizeImage.width,markerBackResizeImage.height,markerBackResizeImage.config)
+//                                val resultBitmap = Bitmap.createBitmap(backBitmap.width,backBitmap.height,backBitmap.config)
+//                                val resultCanvas = Canvas(resultBitmap)
+////                                resultCanvas.drawBitmap(markerBackResizeImage, Matrix(),null)
+////                                resultCanvas.drawBitmap(markerContentsResizeImage,dpToPxInt(5).toFloat(),dpToPxInt(4).toFloat(),null)
+//                                resultCanvas.drawBitmap(backBitmap, Matrix(),null)
+//                                resultCanvas.drawBitmap(resource,dpToPxInt(5).toFloat(),dpToPxInt(4).toFloat(),null)
+////                                backBitmap.recycle()
+////                                resource.recycle()
+//                                marker.icon = OverlayImage.fromBitmap(resultBitmap)
+//
+//                            }
+//                            override fun onLoadCleared(placeholder: Drawable?) {
+//
+//                            }
+//                        }
+//                    )
 
             }
 

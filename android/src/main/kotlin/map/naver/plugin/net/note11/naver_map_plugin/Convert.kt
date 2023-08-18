@@ -1,13 +1,28 @@
 package map.naver.plugin.net.note11.naver_map_plugin
 
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Canvas
 import com.naver.maps.geometry.LatLng
 import android.graphics.PointF
 import com.naver.maps.geometry.LatLngBounds
 import android.graphics.Color
+import android.graphics.Matrix
+import android.graphics.drawable.Drawable
+import android.util.Log
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.target.CustomTarget
+import com.bumptech.glide.request.transition.Transition
 import com.naver.maps.map.CameraPosition
 import com.naver.maps.map.CameraUpdate
 import com.naver.maps.map.overlay.OverlayImage
 import io.flutter.view.FlutterMain
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import map.naver.plugin.net.lbstech.naver_map_plugin.R
+import java.net.HttpURLConnection
+import java.net.URL
 import kotlin.math.roundToInt
 
 object Convert {
@@ -163,5 +178,58 @@ object Convert {
     fun toOverlayImageFromPath(o: Any?): OverlayImage {
         val imagePath = o as String
         return OverlayImage.fromPath(imagePath)
+    }
+
+    fun toOverlayImageFromURL(context:Context,url:String) : OverlayImage?{
+
+        //        val image = Glide.with(context).asBitmap().load(url).circleCrop()
+//        image.override(40,40)
+
+        val backBitmap = BitmapFactory.decodeResource(context.resources, R.drawable.markerback)
+//        val markerBackResizeImage = resizeBitmap(context,backBitmap,50,60)
+        val contentBitmap = getBtimapConvertFromURL(url)
+//        val markerBackResizeImage = resizeBitmap(backBitmap,50,60)
+//        val markerContentsResizeImage = resizeBitmap(resource,40,40)
+
+        if (contentBitmap != null){
+            val resultBitmap = Bitmap.createBitmap(backBitmap.width,backBitmap.height,backBitmap.config)
+            val resultCanvas = Canvas(resultBitmap)
+            resultCanvas.drawBitmap(backBitmap, Matrix(),null)
+            resultCanvas.drawBitmap(contentBitmap,dpToPxInt(5,context).toFloat(),dpToPxInt(4,context).toFloat(),null)
+            return OverlayImage.fromBitmap(resultBitmap)
+        }
+
+        return null
+    }
+
+    fun resizeBitmap(context:Context,resource : Bitmap,width : Int, height : Int) : Bitmap{
+        return Bitmap.createScaledBitmap(resource,dpToPxInt(width,context),dpToPxInt(height,context),true)
+    }
+    fun dpToPxInt(dp : Int,context :Context) : Int{
+        val density = context.resources.displayMetrics.density
+        return (dp * density).toInt()
+    }
+    private fun getBtimapConvertFromURL(url:String) : Bitmap?{
+        val url = URL(url)
+        val connection = url.openConnection() as HttpURLConnection
+        connection.doInput = true
+        connection.connect()
+        val input = connection.inputStream
+        val bitmap = BitmapFactory.decodeStream(input)
+        return bitmap
+//        try{
+//            GlobalScope.launch {
+//                val url = URL(url)
+//                val connection = url.openConnection() as HttpURLConnection
+//                connection.doInput = true
+//                connection.connect()
+//                val input = connection.inputStream
+//                val bitmap = BitmapFactory.decodeStream(input)
+//
+//
+//            }
+//        }catch (e: Exception){
+//            Log.d("ImageException","UserMarker Image Load Fail : ${e}")
+//        }
     }
 }
