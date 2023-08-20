@@ -1,14 +1,9 @@
 package map.naver.plugin.net.note11.naver_map_plugin
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.Canvas
+import android.graphics.*
 import com.naver.maps.geometry.LatLng
-import android.graphics.PointF
 import com.naver.maps.geometry.LatLngBounds
-import android.graphics.Color
-import android.graphics.Matrix
 import android.graphics.drawable.Drawable
 import android.util.Log
 import com.bumptech.glide.Glide
@@ -192,10 +187,18 @@ object Convert {
 //        val markerContentsResizeImage = resizeBitmap(resource,40,40)
 
         if (contentBitmap != null){
+//            val markerBackResizeImage = resizeBitmap(context,backBitmap,50,60)
+//        val markerContentsResizeImage = resizeBitmap(context,contentBitmap,40,40)
+            Log.d("승하 위드",backBitmap.width.toString())
+            val tempBitmap = resizeBitmap(context,contentBitmap,139,139)
+//            val markerContentsResizeImage = resizeBitmap(context,contentBitmap,139,139)
+            val markerContentsResizeImage = setCircleBitmap(tempBitmap)
+
+            Log.d("승하 위드2",markerContentsResizeImage.width.toString())
             val resultBitmap = Bitmap.createBitmap(backBitmap.width,backBitmap.height,backBitmap.config)
             val resultCanvas = Canvas(resultBitmap)
             resultCanvas.drawBitmap(backBitmap, Matrix(),null)
-            resultCanvas.drawBitmap(contentBitmap,dpToPxInt(5,context).toFloat(),dpToPxInt(4,context).toFloat(),null)
+            resultCanvas.drawBitmap(markerContentsResizeImage,dpToPxInt(5,context).toFloat(),dpToPxInt(4,context).toFloat(),null)
             return OverlayImage.fromBitmap(resultBitmap)
         }
 
@@ -207,6 +210,7 @@ object Convert {
     }
     fun dpToPxInt(dp : Int,context :Context) : Int{
         val density = context.resources.displayMetrics.density
+        Log.d("승하 위드3",density.toString())
         return (dp * density).toInt()
     }
     private fun getBtimapConvertFromURL(url:String) : Bitmap?{
@@ -231,5 +235,44 @@ object Convert {
 //        }catch (e: Exception){
 //            Log.d("ImageException","UserMarker Image Load Fail : ${e}")
 //        }
+
+
+
+        /*
+        public static Bitmap GetBitmapClippedCircle(Bitmap bitmap) {
+
+        final int width = bitmap.getWidth();
+        final int height = bitmap.getHeight();
+        final Bitmap outputBitmap = Bitmap.createBitmap(width, height, Config.ARGB_8888);
+
+        final Path path = new Path();
+        path.addCircle(
+                  (float)(width / 2)
+                , (float)(height / 2)
+                , (float) Math.min(width, (height / 2))
+                , Path.Direction.CCW);
+
+        final Canvas canvas = new Canvas(outputBitmap);
+        canvas.clipPath(path);
+        canvas.drawBitmap(bitmap, 0, 0, null);
+        return outputBitmap;
+    }
+         */
+    }
+    fun setCircleBitmap(bitmap : Bitmap) : Bitmap{
+        val width = bitmap.width
+        val height = bitmap.height
+        val outputBitmap = Bitmap.createBitmap(width,height,Bitmap.Config.ARGB_8888)
+        val path = Path()
+        path.addCircle(
+            (width/2).toFloat(),
+            (height/2).toFloat(),
+            Math.min(width,(height/2)).toFloat(),
+            Path.Direction.CCW
+        )
+        val canvas = Canvas(outputBitmap)
+        canvas.clipPath(path)
+        canvas.drawBitmap(bitmap,(0).toFloat(),(0).toFloat(),null)
+        return outputBitmap
     }
 }
