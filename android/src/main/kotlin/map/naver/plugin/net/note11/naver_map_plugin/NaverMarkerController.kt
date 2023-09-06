@@ -172,36 +172,29 @@ class NaverMarkerController(
             if (iconImagePath != null) marker.icon = toOverlayImageFromPath(iconImagePath)
             val iconImageUrl = json["iconFromUrl"]
             if (iconImageUrl != null) {
-                val markerImage = toOverlayImageFromURL(context,iconImageUrl.toString())
-                if(markerImage != null){
-                        marker.icon = markerImage
+                // val markerImage = toOverlayImageFromURL(context,iconImageUrl.toString())
+                // if(markerImage != null){
+                //         marker.icon = markerImage
+                // }
+                val backBitmap = BitmapFactory.decodeResource(context.resources, R.drawable.markerback)
+                    CoroutineScope(Dispatchers.Main).launch {
+                        var icon = getBitmapfromUrl(iconImageUrl.toString())
+                        val contentBitmap = icon
+                        if (contentBitmap != null){
+                            Log.d("승하 위드",backBitmap.width.toString())
+                            val tempBitmap = Convert.resizeBitmap(context, contentBitmap, 135, 135)
+                            val markerContentsResizeImage = Convert.setCircleBitmap(tempBitmap)
+                            Log.d("승하 위드2",markerContentsResizeImage.width.toString())
+                            val resultBitmap = Bitmap.createBitmap(backBitmap.width,backBitmap.height,backBitmap.config)
+                            val resultCanvas = Canvas(resultBitmap)
+                            resultCanvas.drawBitmap(backBitmap, Matrix(),null)
+                            resultCanvas.drawBitmap(markerContentsResizeImage,
+                                Convert.dpToPxInt(5, context).toFloat(),
+                                Convert.dpToPxInt(4, context).toFloat(),null)
+                            marker.icon = OverlayImage.fromBitmap(resultBitmap)
+                        }
+//                    marker.icon = OverlayImage.fromBitmap(icon)
                 }
-//                Glide.with(context).asBitmap().load(iconImageUrl)
-////                    .apply(RequestOptions.circleCropTransform())
-//                    .circleCrop()
-//                    .into(
-//                        object : CustomTarget<Bitmap>(){
-//                            override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
-//                                val backBitmap = BitmapFactory.decodeResource(context.resources,R.drawable.markerback)
-////                                val markerBackResizeImage = resizeBitmap(backBitmap,50,60)
-////                                val markerContentsResizeImage = resizeBitmap(resource,40,40)
-////                                val resultBitmap = Bitmap.createBitmap(markerBackResizeImage.width,markerBackResizeImage.height,markerBackResizeImage.config)
-//                                val resultBitmap = Bitmap.createBitmap(backBitmap.width,backBitmap.height,backBitmap.config)
-//                                val resultCanvas = Canvas(resultBitmap)
-////                                resultCanvas.drawBitmap(markerBackResizeImage, Matrix(),null)
-////                                resultCanvas.drawBitmap(markerContentsResizeImage,dpToPxInt(5).toFloat(),dpToPxInt(4).toFloat(),null)
-//                                resultCanvas.drawBitmap(backBitmap, Matrix(),null)
-//                                resultCanvas.drawBitmap(resource,dpToPxInt(5).toFloat(),dpToPxInt(4).toFloat(),null)
-////                                backBitmap.recycle()
-////                                resource.recycle()
-//                                marker.icon = OverlayImage.fromBitmap(resultBitmap)
-//
-//                            }
-//                            override fun onLoadCleared(placeholder: Drawable?) {
-//
-//                            }
-//                        }
-//                    )
 
             }
 
@@ -242,4 +235,27 @@ class NaverMarkerController(
         val density = context.resources.displayMetrics.density
         return (dp * density).toInt()
     }
+
+
+    suspend fun getBitmapfromUrl(url : String) : Bitmap{
+
+                var icon = CoroutineScope(Dispatchers.IO).async {
+                    val backBitmap = BitmapFactory.decodeResource(context.resources, R.drawable.markerback)
+                    var image : Bitmap = async{
+                        val url = URL(url.toString())
+                        val connection = url.openConnection() as HttpURLConnection
+                        connection.useCaches = false
+                        connection.doInput = true
+                        connection.connect()
+                        val input = connection.inputStream
+                        val bitmap = BitmapFactory.decodeStream(input)
+                        connection.disconnect()
+                        bitmap
+                    }.await()
+                    image
+                }
+
+            return icon.await()
+
+        }
 }
