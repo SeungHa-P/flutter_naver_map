@@ -1,5 +1,5 @@
 group 'map.naver.plugin.net.lbstech.naver_map_plugin'
-version '1.0'
+version '1.0.1'
 
 buildscript {
     repositories {
