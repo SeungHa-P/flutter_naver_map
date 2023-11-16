@@ -37,6 +37,7 @@ import com.naver.maps.map.overlay.Marker
 import com.naver.maps.map.overlay.OverlayImage
 import map.naver.plugin.net.lbstech.naver_map_plugin.R
 import map.naver.plugin.net.note11.naver_map_plugin.Convert.toOverlayImageFromURL
+import java.lang.Exception
 import java.util.HashMap
 import java.util.concurrent.Executors
 import kotlin.math.roundToInt
@@ -237,25 +238,29 @@ class NaverMarkerController(
     }
 
 
-    suspend fun getBitmapfromUrl(url : String) : Bitmap{
+    suspend fun getBitmapfromUrl(url : String) : Bitmap?{
 
-                var icon = CoroutineScope(Dispatchers.IO).async {
-                    val backBitmap = BitmapFactory.decodeResource(context.resources, R.drawable.markerback)
-                    var image : Bitmap = async{
-                        val url = URL(url.toString())
-                        val connection = url.openConnection() as HttpURLConnection
-                        connection.useCaches = false
-                        connection.doInput = true
-                        connection.connect()
-                        val input = connection.inputStream
-                        val bitmap = BitmapFactory.decodeStream(input)
-                        connection.disconnect()
-                        bitmap
-                    }.await()
-                    image
-                }
+             try{
+                 var icon = CoroutineScope(Dispatchers.IO).async {
+                     val backBitmap = BitmapFactory.decodeResource(context.resources, R.drawable.markerback)
+                     var image : Bitmap = async{
+                         val url = URL(url.toString())
+                         val connection = url.openConnection() as HttpURLConnection
+                         connection.useCaches = false
+                         connection.doInput = true
+                         connection.connect()
+                         val input = connection.inputStream
+                         val bitmap = BitmapFactory.decodeStream(input)
+                         connection.disconnect()
+                         bitmap
+                     }.await()
+                     image
+                 }
 
-            return icon.await()
+                 return icon.await()
+             }catch (e : Exception){
+                 return null
+             }
 
         }
 }
